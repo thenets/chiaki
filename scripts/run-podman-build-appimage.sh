@@ -6,7 +6,7 @@ cd "`dirname $(readlink -f ${0})`"
 podman build -t chiaki-bionic . -f Dockerfile.bionic
 cd ..
 podman run --rm \
-	-v "`pwd`:/build/chiaki" \
+	-v "`pwd`:/build/chiaki:rw,z" \
 	-w "/build/chiaki" \
 	--device /dev/fuse \
 	--cap-add SYS_ADMIN \
