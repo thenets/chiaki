@@ -373,7 +373,20 @@ static void *session_thread_func(void *arg)
 	CHIAKI_LOGI(session->log, "Starting session request for %s", session->connect_info.ps5 ? "PS5" : "PS4");
 
 	ChiakiTarget server_target = CHIAKI_TARGET_PS4_UNKNOWN;
-	ChiakiErrorCode err = session_thread_request_session(session, &server_target);
+
+	int total_retries = 12;
+	int retry_interval_seconds = 5;
+	ChiakiErrorCode err;
+	for (int i = 0; i < total_retries; i++) {
+		ChiakiErrorCode err = session_thread_request_session(session, &server_target);
+		if (err == CHIAKI_ERR_SUCCESS) {
+			break;
+		}
+		for (int j = 0; j < retry_interval_seconds; j++) {
+			sleep(1);
+			CHIAKI_LOGE(session->log, "Attempt %d/%d failed, retrying in %d seconds", i + 1, total_retries, retry_interval_seconds - j);
+		}
+	}
 
 	if(err == CHIAKI_ERR_VERSION_MISMATCH && !chiaki_target_is_unknown(server_target))
 	{
