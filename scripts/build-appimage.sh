@@ -2,6 +2,11 @@
 
 set -xe
 
+SCRIPT_DIR=$(dirname $(readlink -f ${0}))
+
+# Delete old AppImage directory
+rm -rf ${SCRIPT_DIR}/../appimage
+
 # sometimes there are errors in linuxdeploy in docker/podman when the appdir is on a mount
 appdir=${1:-`pwd`/appimage/appdir}
 
@@ -13,8 +18,8 @@ export PATH="`pwd`/appimage/protoc/bin:$PATH"
 scripts/build-ffmpeg.sh appimage
 scripts/build-sdl2.sh appimage
 
-mkdir build_appimage
-cd build_appimage 
+mkdir -p build_appimage
+cd build_appimage
 cmake \
 	-GNinja \
 	-DCMAKE_BUILD_TYPE=Release \

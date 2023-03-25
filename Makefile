@@ -1,7 +1,11 @@
 WORKDIR := $(PWD)
 
+## Build distribution-ready packages
+.PHONY: dist
+dist: linux-dist-appimage
+
 .PHONY: build
-build: update-submodules linux-build
+build: linux-dist-appimage
 
 .PHONY: linux-build-and-run
 linux-build-and-run: linux-build linux-run
@@ -10,6 +14,14 @@ linux-build-and-run: linux-build linux-run
 linux-run:
 	@echo "# -- Running for Linux"
 	$(WORKDIR)/build/linux/gui/chiaki
+	@echo
+
+linux-dist-appimage: update-submodules linux-build
+	@echo "# -- Building AppImage for Linux"
+	$(WORKDIR)/scripts/run-podman-build-appimage.sh
+	mkdir -p $(WORKDIR)/dist
+	cp $(WORKDIR)/appimage/Chiaki.AppImage $(WORKDIR)/dist/Chiaki.AppImage
+	@echo
 
 .PHONY: linux-all
 linux-all: linux-install-dependencies linux-build
@@ -33,7 +45,7 @@ linux-install-dependencies:
 		python3-protobuf \
 		opus-devel \
 		SDL2-devel \
-		qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtsvg-devel 
+		qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtsvg-devel
 
 .PHONY: update-submodules
 update-submodules:

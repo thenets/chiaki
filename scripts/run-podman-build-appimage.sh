@@ -1,15 +1,21 @@
 #!/bin/bash
 
 set -xe
-cd "`dirname $(readlink -f ${0})`"
 
-podman build -t chiaki-bionic . -f Dockerfile.bionic
-cd ..
+SCRIPT_DIR=$(dirname $(readlink -f ${0}))
+
+CONTAINER_IMAGE_TAG=chiaki-bionic
+
+# Create build image
+cd ${SCRIPT_DIR}
+podman build -t ${CONTAINER_IMAGE_TAG} . -f Dockerfile.bionic
+
+# Build AppImage
+cd ${SCRIPT_DIR}/..
 podman run --rm \
-	-v "`pwd`:/build/chiaki:rw,z" \
+	-v "$(pwd):/build/chiaki:rw,z" \
 	-w "/build/chiaki" \
 	--device /dev/fuse \
 	--cap-add SYS_ADMIN \
-	-t chiaki-bionic \
+	-t ${CONTAINER_IMAGE_TAG} \
 	/bin/bash -c "scripts/build-appimage.sh /build/appdir"
-
